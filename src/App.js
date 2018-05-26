@@ -13,29 +13,51 @@ class App extends Component {
         ]
     };
 
-    deleteUser = (index, e) =>{
-        const Users = this.state.users;
-        Users.splice(index, 1);
+
+    deleteUser (index, e) {
+        const Users = Object.assign([], this.state.users);
+        const userIndex = Users.findIndex( (item) => item.id === index)
+
+       Users.splice(userIndex, 1);
+
+       this.setState({
+           users: Users
+       })
+
+    }
+
+    changeUser (id, e) {
+        const userIndex = this.state.users.findIndex( (item) => item.id === id );
+        const Users = Object.assign([], this.state.users);
+
+        Users[userIndex].name = e.target.value;
+
         this.setState({
             users: Users
         })
-	}
+    }
 
-	changeUserName = (id, e) => {
-		const index = this.state.users.findIndex((user) => {
-			return user.id === id;
-		});
+    addUser (e) {
+        e.preventDefault();
 
-		const User = Object.assign({}, this.state.users[index]);
-		const Users = Object.assign([], this.state.users);
+        const Users = Object.assign([], this.state.users);
+        const newUser = {
+            id: () => Users[Users.length - 1].id + 1,
+            name: e.target.username.value,
+            age: e.target.age.value
+        }
+        
+        this.setState({
+            users: Users.concat(newUser)
+        })
 
-		User.name = e.target.value;
-		Users[index] = User;
+        this.clearInput(e.target.username, e.target.age);
+    }
 
-		this.setState({users: Users});
+    clearInput (...inputs){
+        return inputs.map( (item) => item.value = "");
+    }
 
-
-	}
 	
     // PROPS =>
     // The render always send props and the component always receive it.
@@ -45,19 +67,19 @@ class App extends Component {
             <div className="app">
                 <ul>
                     {
-                        this.state.users.map((user, index) => {
-                            return(
-                                <User 
-                                    delEvent={this.deleteUser.bind(this, index)} 
-                                    key={user.id} 
-                                    age={user.age}
-									changeEvent={this.changeUserName.bind(this, user.id)}>
-                                        {user.name}
-                                </User> 
-                            )
+                        this.state.users.map( (item, index) => {
+                            return <User key={item.id} changeEvent={this.changeUser.bind(this, item.id)} delEvent={this.deleteUser.bind(this, item.id)} >{item.name}</User>
                         })
                     }
                 </ul>
+                <form onSubmit={this.addUser.bind(this)}>
+                    <label>Username:</label>
+                    <input type="text" name="username" />
+                    <label>Age:</label>
+                    <input type="number" name="age" />
+                    <br />
+                    <input type="submit" value="Add User"/>
+                </form>
             </div>
         );
     }
